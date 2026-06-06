@@ -1,0 +1,27 @@
+[project]
+name = "ai-spend-tracker"
+version = "0.1.0"
+description = "Aggregate token usage & cost across all your AI coding agents (Hermes, Codex, Claude Code, and more)"
+authors = [
+    {name = "vick"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "rich>=13.0.0",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Topic :: Utilities",
+]
+
+[project.scripts]
+ai-spend = "ai_spend_tracker.main:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["ai_spend_tracker*"]
