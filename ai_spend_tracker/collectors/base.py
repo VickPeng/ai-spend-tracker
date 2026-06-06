@@ -42,6 +42,21 @@ DEFAULT_PRICING: dict[str, float] = {
     "claude-sonnet-4-6": 15.0,
     "claude-sonnet-4": 15.0,
     "claude-opus-4": 15.0,
+    "claude-opus-4-8": 15.0,
+    "claude-sonnet-4.5": 15.0,
+    "claude-haiku-3.5": 1.0,
+    # Claude Code 内部模型别名
+    "claude-sonnet-4-8": 15.0,
+    "claude-opus-4-5": 15.0,
+    # GitHub Copilot（常见模型）
+    "gpt-5.4": 10.0,
+    "gpt-5.5": 15.0,
+    "gpt-5.1": 5.0,
+    "claude-sonnet-4.5": 15.0,
+    # Kimi (Moonshot AI)
+    "kimi-for-coding": 4.0,
+    "moonshot-k2.5": 4.0,
+    "moonshot-k2.6": 4.0,
 }
 
 

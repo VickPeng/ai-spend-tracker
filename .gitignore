@@ -1,6 +1,30 @@
-.venv/
+# Python
 __pycache__/
+*.py[cod]
 *.egg-info/
-*.pyc
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
 .env
-.ai-spend/
+*.db
+*.sqlite
+*.sqlite3
+.history.jsonl

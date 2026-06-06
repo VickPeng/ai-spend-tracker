@@ -60,7 +60,7 @@ def render_report(
 
     console.print()
     console.print(
-        f"[bold]AI Spend Tracker[/bold] — 用量汇总{period_str}"
+        f"[bold]AI Spend Tracker[/bold] — Usage Summary{period_str}"
     )
     console.print(f"[dim]Total: {len(records)} sessions from {len(set(r.source for r in records))} agent(s)[/dim]")
     console.print()

@@ -60,6 +60,18 @@ def cmd_init(agent_name: str | None = None) -> None:
     init_user_dirs(agent_name)
     console.print("[green]~/.ai-spend/ initialized![/green]")
     console.print("Place custom collectors in: [bold]~/.ai-spend/collectors/[/bold]")
+    console.print()
+    console.print("Path overrides (if auto-detection fails):")
+    console.print("  Create [bold]~/.ai-spend/config.json[/bold] with:")
+    console.print(
+        '  [dim]{"paths": {"hermes": "D:/custom/hermes/state.db",'
+        ' "codex": "C:/Users/me/.codex/state_1.sqlite",'
+        ' "copilot": "D:/copilot/session-store.db",'
+        ' "opencode": "D:/opencode/opencode.db",'
+        ' "claude-code": "D:/claude/projects",'
+        ' "openclaw": "D:/.openclaw",'
+        ' "kimi": "D:/.kimi"}}[/dim]'
+    )
 
 
 def cmd_report(
@@ -130,12 +142,32 @@ def cmd_report(
 
     # 收集数据
     all_records = []
+    collectors_with_warnings = []
     for c in collectors:
         try:
             records = c.collect(since=since, until=until)
             all_records.extend(records)
+            if not records:
+                warning = c.warning_hint() if hasattr(c, 'warning_hint') else None
+                if warning:
+                    collectors_with_warnings.append(warning)
         except Exception as e:
             console.print(f"[red]Error collecting from {c.name()}: {e}[/red]")
+
+    if not all_records:
+        console.print("[yellow]No session data found for the given period.[/yellow]")
+        console.print("Try: [bold]ai-spend --days 30[/bold] or [bold]ai-spend --demo[/bold]")
+        if collectors_with_warnings:
+            console.print()
+            for w in collectors_with_warnings:
+                console.print(w)
+        return
+
+    # 显示 collectors 的提示（即使有数据）
+    if collectors_with_warnings:
+        console.print()
+        for w in collectors_with_warnings:
+            console.print(w)
 
     # 输出
     if output_format == "json":
@@ -148,6 +180,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ai-spend",
         description="Aggregate token usage & cost across all your AI coding agents.",
+        epilog=(
+            "Path override (if auto-detection fails):\n"
+            "  Create ~/.ai-spend/config.json:\n"
+            '    {"paths": {"hermes": "D:/custom/hermes/state.db",\n'
+            '              "codex": "C:/Users/me/.codex/state_1.sqlite",\n'
+            '              "copilot": "D:/copilot/session-store.db",\n'
+            '              "opencode": "D:/opencode/opencode.db",\n'
+            '              "claude-code": "D:/claude/projects",\n'
+            '              "openclaw": "D:/.openclaw",\n'
+            '              "kimi": "D:/.kimi"}}\n'
+            "  Run 'ai-spend --init' for more details."
+        ),
     )
     parser.add_argument(
         "--list-agents", action="store_true",
@@ -155,7 +199,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--init", nargs="?", const=True, default=False,
-        help="Initialize ~/.ai-spend/ directory. Optionally specify a collector name: --init my-agent",
+        help="Initialize ~/.ai-spend/ directory (collectors template). Optionally specify a collector name: --init my-agent",
     )
     parser.add_argument(
         "--agent", type=str, default=None,

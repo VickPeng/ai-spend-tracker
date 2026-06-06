@@ -4,7 +4,10 @@
 
 from __future__ import annotations
 
+import json
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -35,27 +38,146 @@ def _wsl_windows_home() -> Path:
     return Path()
 
 
+# ---------------------------------------------------------------------------
+# 用户配置覆盖（~/.ai-spend/config.json）
+# 当自动探测找不到数据源时，用户可以手动指定路径
+#
+# 格式：
+#   {"paths": {"hermes": "D:/custom/hermes/state.db",
+#              "codex": "C:/Users/me/.codex/state_1.sqlite",
+#              "claude-code": "/home/user/claude/usage.db"}}
+# ---------------------------------------------------------------------------
+
+def _load_user_config() -> dict:
+    """加载 ~/.ai-spend/config.json（可选）。"""
+    cfg_file = Path.home() / ".ai-spend" / "config.json"
+    try:
+        if cfg_file.exists():
+            with open(cfg_file) as f:
+                return json.load(f) or {}
+    except Exception:
+        pass
+    return {}
+
+
+def get_path_override(agent_name: str) -> Path | None:
+    """检查用户是否在 config.json 中手动指定了 collector 的数据源路径。"""
+    cfg = _load_user_config()
+    raw = cfg.get("paths", {}).get(agent_name)
+    if not raw:
+        return None
+    try:
+        p = Path(raw).expanduser().resolve()
+        if p.exists():
+            return p
+    except Exception:
+        pass
+    return None
+
+
+def _find_wsl_state_db() -> Path | None:
+    """When running on Windows, find Hermes state.db via WSL network path."""
+    if sys.platform != "win32":
+        return None
+    try:
+        # 获取默认 WSL 发行版名称
+        result = subprocess.run(
+            ["wsl.exe", "--list", "--quiet"],
+            capture_output=True, timeout=15
+        )
+        raw = result.stdout
+        # wsl.exe --list 输出可能是 UTF-16-LE 或 UTF-8
+        if b"\x00" in raw:
+            distro = raw.decode("utf-16-le", errors="replace").strip().split("\n")[0].strip()
+        else:
+            distro = raw.decode("utf-8", errors="replace").strip().split("\n")[0].strip()
+        if not distro:
+            return None
+
+        # 在 WSL 内查询实际的 state.db 路径（尊重 $HERMES_HOME 和 $HOME）
+        query_result = subprocess.run(
+            ["wsl.exe", "-d", distro, "sh", "-c",
+             'echo "${HERMES_HOME:-$HOME/.hermes}/state.db"'],
+            capture_output=True, timeout=15
+        )
+        raw_path = query_result.stdout
+        if b"\x00" in raw_path:
+            wsl_path = raw_path.decode("utf-16-le", errors="replace").strip().split("\n")[0].strip()
+        else:
+            wsl_path = raw_path.decode("utf-8", errors="replace").strip().split("\n")[0].strip()
+        if not wsl_path or not wsl_path.startswith("/"):
+            return None
+
+        # 去掉前导 /，构造 UNC 路径：\\wsl.localhost\<distro>\home\vick\.hermes\state.db
+        unc_rel = wsl_path.lstrip("/")
+        for base in [r"\\wsl.localhost", r"\\wsl$"]:
+            p = Path(f"{base}\\{distro}\\{unc_rel}")
+            if p.exists():
+                return p
+    except Exception:
+        pass
+    return None
+
+
 def hermes_db_path() -> Path | None:
-    wsl_path = Path.home() / ".hermes" / "state.db"
-    if wsl_path.exists():
-        return wsl_path
+    # 1. 用户手动覆盖
+    override = get_path_override("hermes")
+    if override:
+        return override
+
+    # 2. Linux / macOS：~/.hermes/state.db
+    default_path = Path.home() / ".hermes" / "state.db"
+    if default_path.exists():
+        return default_path
+
+    # 3. macOS（~/Library/Application Support/ 备用）
+    mac_path = Path.home() / "Library" / "Application Support" / "hermes" / "state.db"
+    if mac_path.exists():
+        return mac_path
+
+    # 4. Windows 原生路径（C:\Users\<user>\.hermes\state.db）
     win_home = _wsl_windows_home()
     if win_home:
         win_path = win_home / ".hermes" / "state.db"
         if win_path.exists():
             return win_path
+
+    # 5. Windows → WSL 网络路径（\\wsl.localhost\...）
+    if sys.platform == "win32":
+        wsl_net = _find_wsl_state_db()
+        if wsl_net:
+            return wsl_net
+
     return None
 
 
 def codex_state_db_path() -> Path | None:
-    win_home = _wsl_windows_home()
-    for base in [Path.home(), win_home]:
+    # 1. 用户手动覆盖
+    override = get_path_override("codex")
+    if override:
+        return override
+
+    # 2. Linux / macOS
+    for base in [Path.home(), Path.home() / "Library" / "Application Support"]:
         codex_dir = base / ".codex"
         if not codex_dir.exists():
             continue
         sqlites = sorted(codex_dir.glob("state_*.sqlite"))
         if sqlites:
             return sqlites[-1]
+
+    # 3. Windows（通过 WSL /mnt/c/）
+    win_home = _wsl_windows_home()
+    for base in [win_home]:
+        if not base:
+            continue
+        codex_dir = base / ".codex"
+        if not codex_dir.exists():
+            continue
+        sqlites = sorted(codex_dir.glob("state_*.sqlite"))
+        if sqlites:
+            return sqlites[-1]
+
     return None
 
 

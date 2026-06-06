@@ -2,16 +2,31 @@
 
 **Aggregate token usage & cost across all your AI coding agents in one CLI.**
 
-Hermes Agent, Codex CLI, Claude Code, Cursor, OpenClaw — if you run multiple AI coding tools, you're probably flying blind on how much you're actually spending. AI Spend Tracker pulls session data from every agent you use and shows you the big picture.
+If you run multiple AI coding tools (Claude Code, Codex, Hermes, OpenClaw, OpenCode, GitHub Copilot, Kimi), you're probably flying blind on how much you're actually spending. AI Spend Tracker reads session data from every agent's local storage and shows you the big picture.
 
 ## Features
 
-- **Multi-agent aggregation** — see Hermes + Codex + custom agents in one report
-- **Built-in collectors** — works out of the box with Hermes Agent and Codex CLI
-- **Extensible** — add custom collectors for any AI agent
-- **Plug-in architecture** — drop a Python file in `~/.ai-spend/collectors/`, it just works
+- **7 built-in collectors** — Hermes Agent, Codex CLI, GitHub Copilot CLI, OpenCode, Claude Code, OpenClaw, Kimi Code CLI
+- **Cross-platform** — Windows (native + WSL), Linux, macOS
+- **Multi-agent aggregation** — all agents in one report
+- **Extensible** — drop a custom collector in `~/.ai-spend/collectors/`
+- **Path override** — manual data source path via `~/.ai-spend/config.json`
 - **Rich terminal output** — agent summary, model breakdown, daily trends
 - **JSON output** — pipe data into your own dashboards
+
+## Supported Agents
+
+| Collector | Agent | Data Source |
+|-----------|-------|-------------|
+| `hermes` | Hermes Agent (Nous Research) | `~/.hermes/state.db` |
+| `codex` | OpenAI Codex CLI | `~/.codex/state_*.sqlite` |
+| `copilot` | GitHub Copilot CLI | `~/.copilot/session-store.db` |
+| `opencode` | OpenCode CLI | `~/.local/share/opencode/opencode.db` |
+| `claude-code` | Claude Code (Anthropic) | `~/.claude/projects/*.jsonl` |
+| `openclaw` | OpenClaw | `~/.openclaw/agents/*/sessions/*.jsonl` |
+| `kimi` | Kimi Code CLI (Moonshot AI) | `~/.kimi/sessions/*/*/wire.jsonl` |
+
+> Note: Claude Code v2.1.140+ may not persist session logs to disk. See [anthropics/claude-code#25941](https://github.com/anthropics/claude-code/issues/25941).
 
 ## Quick Start
 
@@ -24,82 +39,68 @@ ai-spend
 
 # List available data sources
 ai-spend --list-agents
+
+# See only Hermes data
+ai-spend --agent hermes
+
+# All historical data (no time limit)
+ai-spend --days 0
+
+# JSON output
+ai-spend --format json
 ```
 
 ## Usage
 
-```bash
-# Default: last 7 days
-ai-spend
+```
+ai-spend [options]
 
-# Custom time range
-ai-spend --days 30
-ai-spend --since 2026-01-01 --until 2026-06-01
-ai-spend --days 0              # all time
-
-# Filter by agent
-ai-spend --agent hermes
-ai-spend --agent hermes,codex
-
-# JSON output (great for piping)
-ai-spend --format json
-
-# Initialize custom collector directory
-ai-spend init
-# Or create a named collector:
-ai-spend init my-custom-agent
-
-# List available collectors
-ai-spend --list-agents
+Options:
+  --list-agents         List all available data collectors
+  --init [name]         Initialize ~/.ai-spend/ directory
+  --agent AGENT         Filter by agent name (comma-separated)
+  --days DAYS           Days to look back (default: 7, 0 = all time)
+  --since YYYY-MM-DD    Start date
+  --until YYYY-MM-DD    End date
+  --format {table,json} Output format (default: table)
+  --demo                Show sample data (no real agents needed)
 ```
 
-## Supported Agents
+## Path Override
 
-| Agent | Status | Data Source |
-|-------|--------|-------------|
-| Hermes Agent | ✅ Built-in | `~/.hermes/state.db` |
-| Codex CLI | ✅ Built-in | `~/.codex/state_N.sqlite` |
-| Claude Code | 🔄 In progress | Hook-based (see roadmap) |
-| OpenClaw | 🔄 Planned | TBD |
-| Your custom agent | ✅ Via plugin | `~/.ai-spend/collectors/your_agent.py` |
+If auto-detection fails, manually specify data source paths:
+
+```json
+// ~/.ai-spend/config.json
+{"paths": {
+  "hermes": "D:/custom/hermes/state.db",
+  "codex": "C:/Users/me/.codex/state_1.sqlite",
+  "copilot": "D:/copilot/session-store.db",
+  "opencode": "D:/opencode/opencode.db",
+  "claude-code": "D:/claude/projects",
+  "openclaw": "D:/.openclaw",
+  "kimi": "D:/.kimi"
+}}
+```
 
 ## Custom Collectors
 
-Any AI agent can be tracked by writing a 20-line Python file:
+Create your own collector in `~/.ai-spend/collectors/`:
 
-```python
-# ~/.ai-spend/collectors/my-agent.py
-from ai_spend_tracker.collectors.base import BaseCollector, estimate_cost
-from ai_spend_tracker.models import SessionRecord
-
-class MyAgentCollector(BaseCollector):
-    def name(self) -> str:
-        return "my-agent"
-
-    def display_name(self) -> str:
-        return "My Agent"
-
-    def collect(self, since=None, until=None):
-        # Read your agent's logs, parse them, return SessionRecord[]
-        return [
-            SessionRecord(
-                session_id="...",
-                source=self.name(),
-                model="gpt-4",
-                input_tokens=1000,
-                output_tokens=200,
-                cost_usd=estimate_cost(1000, 200, "gpt-4"),
-            )
-        ]
+```bash
+ai-spend init my-agent
+# Edit ~/.ai-spend/collectors/my-agent.py
+# Implement BaseCollector.name(), display_name(), collect()
 ```
 
-Run `ai-spend init <name>` to generate a template.
+## Platform Support
 
-## Roadmap
-
-- **Phase 1** (current): CLI tool — local aggregation across installed agents
-- **Phase 2**: Web dashboard — cloud panel with history & trends
-- **Phase 3**: Pro — proxy mode for precise tracking, team features, alerts
+| Platform | Status |
+|----------|--------|
+| Linux | ✅ Full |
+| macOS | ✅ Full |
+| Windows (native) | ✅ Full |
+| Windows (WSL) | ✅ Full |
 
 ## License
 

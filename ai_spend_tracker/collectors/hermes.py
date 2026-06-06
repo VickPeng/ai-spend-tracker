@@ -4,7 +4,9 @@ HermesCollector — 从 Hermes Agent 的 state.db 读取会话数据。
 
 from __future__ import annotations
 
+import shutil
 import sqlite3
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -38,6 +40,23 @@ class HermesCollector(BaseCollector):
         if db_path is None or not db_path.exists():
             return []
 
+        # Hermes 可能正在运行（DB 被锁），复制到临时文件再读
+        tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+        try:
+            shutil.copy2(str(db_path), tmp.name)
+            tmp.close()
+            return self._read_db(tmp.name, since, until)
+        except Exception:
+            return []
+        finally:
+            Path(tmp.name).unlink(missing_ok=True)
+
+    def _read_db(
+        self,
+        db_path: str,
+        since: Optional[datetime],
+        until: Optional[datetime],
+    ) -> list[SessionRecord]:
         records: list[SessionRecord] = []
         conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         try:
@@ -96,7 +115,7 @@ class HermesCollector(BaseCollector):
                         cache_write_tokens=cache_w or 0,
                         reasoning_tokens=reason or 0,
                         cost_usd=cost or 0.0,
-                        api_calls=api_calls or 0,
+                        api_calls=api_calls or 1,
                     )
                 )
         finally:
