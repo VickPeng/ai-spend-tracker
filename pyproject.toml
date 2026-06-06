@@ -25,6 +25,7 @@ classifiers = [
 ]
 keywords = ["token-usage", "cost-tracking", "ai-coding-agent", "claude-code", "opencode"]
 license = {text = "MIT"}
+readme = "README.md"
 
 [project.urls]
 Homepage = "https://github.com/vick/ai-spend-tracker"
@@ -40,3 +41,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["ai_spend_tracker*"]
+
+[tool.setuptools.license-files]
+files = ["LICENSE"]
