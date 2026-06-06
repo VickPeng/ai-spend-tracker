@@ -2,6 +2,8 @@
 
 **Aggregate token usage & cost across all your AI coding agents in one CLI.**
 
+![AI Spend Tracker demo](docs/screenshot.svg)
+
 If you run multiple AI coding tools (Claude Code, Codex, Hermes, OpenClaw, OpenCode, GitHub Copilot, Kimi), you're probably flying blind on how much you're actually spending. AI Spend Tracker reads session data from every agent's local storage and shows you the big picture.
 
 ## Features

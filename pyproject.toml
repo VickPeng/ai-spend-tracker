@@ -21,16 +21,15 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Utilities",
-    "Topic :: Software Development :: Monitoring",
 ]
 keywords = ["token-usage", "cost-tracking", "ai-coding-agent", "claude-code", "opencode"]
 license = {text = "MIT"}
 readme = "README.md"
 
 [project.urls]
-Homepage = "https://github.com/vick/ai-spend-tracker"
-Repository = "https://github.com/vick/ai-spend-tracker"
-"Bug Tracker" = "https://github.com/vick/ai-spend-tracker/issues"
+Homepage = "https://github.com/VickPeng/ai-spend-tracker"
+Repository = "https://github.com/VickPeng/ai-spend-tracker"
+"Bug Tracker" = "https://github.com/VickPeng/ai-spend-tracker/issues"
 
 [project.scripts]
 ai-spend = "ai_spend_tracker.main:main"
@@ -41,3 +40,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["ai_spend_tracker*"]
+
+[tool.setuptools]
+license-files = []
