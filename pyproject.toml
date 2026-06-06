@@ -24,6 +24,7 @@ classifiers = [
     "Topic :: Software Development :: Monitoring",
 ]
 keywords = ["token-usage", "cost-tracking", "ai-coding-agent", "claude-code", "opencode"]
+license = {text = "MIT"}
 
 [project.urls]
 Homepage = "https://github.com/vick/ai-spend-tracker"
