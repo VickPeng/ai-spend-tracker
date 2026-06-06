@@ -1,6 +1,6 @@
 [project]
 name = "ai-spend-tracker"
-version = "0.2.0"
+version = "0.2.1"
 description = "Aggregate token usage & cost across all your AI coding agents (Hermes, Codex, Claude Code, Copilot, OpenCode, OpenClaw, Kimi)"
 authors = [
     {name = "vick"},
