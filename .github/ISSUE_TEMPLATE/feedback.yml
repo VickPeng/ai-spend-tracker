@@ -1,0 +1,52 @@
+name: Quick Feedback
+description: Share your thoughts in 30 seconds
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Quick — what do you think?
+
+  - type: dropdown
+    id: rating
+    attributes:
+      label: Overall experience
+      options:
+        - 😍 Love it
+        - 😊 Good
+        - 😐 Meh
+        - 😡 Awful
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agents
+    attributes:
+      label: Which agents do you use?
+      multiple: true
+      options:
+        - Hermes Agent
+        - Codex CLI
+        - Claude Code
+        - GitHub Copilot
+        - OpenCode
+        - OpenClaw
+        - Kimi Code CLI
+        - None yet / Just browsing
+
+  - type: dropdown
+    id: usecase
+    attributes:
+      label: Main use case
+      options:
+        - Personal tracking
+        - Team / company reporting
+        - Cost optimization
+        - Just curious
+        - Other
+
+  - type: textarea
+    id: improve
+    attributes:
+      label: One thing to improve?
+      placeholder: "It'd be great if..."

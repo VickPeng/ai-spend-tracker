@@ -4,6 +4,14 @@
 
 ![AI Spend Tracker demo](docs/screenshot.svg)
 
+<p align="center">
+  <a href="https://tally.so/r/ODEBZY"><b>📝 Give feedback (1 min)</b></a>
+  ·
+  <a href="https://github.com/VickPeng/ai-spend-tracker/issues"><b>🐛 Report a bug</b></a>
+  ·
+  <a href="https://github.com/VickPeng/ai-spend-tracker/discussions"><b>💬 Start a discussion</b></a>
+</p>
+
 If you run multiple AI coding tools (Claude Code, Codex, Hermes, OpenClaw, OpenCode, GitHub Copilot, Kimi), you're probably flying blind on how much you're actually spending. AI Spend Tracker reads session data from every agent's local storage and shows you the big picture.
 
 ## Features

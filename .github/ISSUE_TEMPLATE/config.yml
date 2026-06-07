@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📝 Feedback form
+    url: https://tally.so/r/ODEBZY
+    about: 1-minute anonymous feedback
+  - name: 💬 Discussions
+    url: https://github.com/VickPeng/ai-spend-tracker/discussions
+    about: Ask questions, share ideas, get help

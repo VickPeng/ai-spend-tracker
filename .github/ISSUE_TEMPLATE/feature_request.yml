@@ -1,0 +1,46 @@
+name: Feature Request
+description: Suggest an idea for AI Spend Tracker
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea? Let us know!
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - New agent collector
+        - New feature / command
+        - Output format / reporting
+        - UX / CLI improvements
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What's the pain point or missing capability?
+      placeholder: "I wish I could ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution
+      description: How would you like this to work?
+      placeholder: "Add a flag like --export-csv that outputs..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, examples, or links

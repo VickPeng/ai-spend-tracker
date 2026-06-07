@@ -1,0 +1,69 @@
+name: Bug Report
+description: Report a problem with AI Spend Tracker
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Which agent collector is affected?
+      options:
+        - Hermes Agent
+        - Codex CLI
+        - Claude Code
+        - GitHub Copilot
+        - OpenCode
+        - OpenClaw
+        - Kimi Code CLI
+        - Custom collector
+        - Other / Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Run `pip show ai-spend-tracker` and paste the version
+      placeholder: "e.g. 0.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows (native)
+        - Windows (WSL)
+        - Linux
+        - macOS
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen
+      placeholder: "Run ai-spend --agent hermes, got error: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output / logs
+      description: Paste any error messages or terminal output
+      render: shell
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Config (if applicable)
+      description: Paste your ~/.ai-spend/config.json (remove any sensitive paths)
+      render: json
